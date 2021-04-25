@@ -330,4 +330,8 @@ export class PartAPI {
     deleteSurvey(id) {
         return this.fetch(this.apiEndpoint + `/deleteSurvey?id=${id}`);
     }
+
+    logout() {
+        return this.fetch(this.apiEndpoint + "/logout");
+    }
 }
