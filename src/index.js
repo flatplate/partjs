@@ -334,4 +334,8 @@ export class PartAPI {
     logout() {
         return this.fetch(this.apiEndpoint + "/logout");
     }
+
+    getResponseById(id) {
+        return this.fetch(this.apiEndpoint + `/getResponse?id=${id}`).then(res => res.data);
+    }
 }
