@@ -1,4 +1,5 @@
 import { throws } from "assert";
+import jwt from "jwt-decode";
 
 export class PartAPI {
     constructor(apiEndpoint) {
@@ -13,7 +14,7 @@ export class PartAPI {
         return fetch(...args).then((res) => {
             if (!res.ok) {
                 if (res.status === 401) {
-                    this.checkAuthentification();
+                    this.checkAuthentication();
                 }
                 if (res.message) {
                     throw Error(res.message);
@@ -88,7 +89,7 @@ export class PartAPI {
         return this.fetch(this.apiEndpoint + "/authenticate", requestOptions)
             .then((res) => {
                 this.authenticated = true;
-                this.authenticationToken = res.data;
+                this.authenticationToken = jwt(res.data);
                 this.notify("authenticated", this.authenticated);
             })
             .catch((error) => {
@@ -99,7 +100,7 @@ export class PartAPI {
             });
     }
 
-    checkAuthentification() {
+    checkAuthentication() {
         const currentDate = new Date();
 
         if (currentDate.getTime() - this.lastAuthenticationCheck.getTime() < 1000) {
@@ -115,6 +116,7 @@ export class PartAPI {
                 this.notify("authenticated", this.authenticated);
             })
             .catch((error) => {
+                console.log("error in check authenticated", error);
                 this.authenticated = false;
                 this.authenticationToken = null;
                 this.notify("authenticated", this.authenticated);
@@ -223,7 +225,7 @@ export class PartAPI {
             xhr.onload = () => {
                 if (xhr.status !== 200) {
                     if (xhr.status === 401) {
-                        this.checkAuthentification();
+                        this.checkAuthentication();
                     }
                     reject(`Error ${xhr.status}: ${xhr.statusText}`);
                 } else {
@@ -250,7 +252,7 @@ export class PartAPI {
             xhr.onload = () => {
                 if (xhr.status !== 200) {
                     if (xhr.status === 401) {
-                        this.checkAuthentification();
+                        this.checkAuthentication();
                     }
                     reject(`Error ${xhr.status}: ${xhr.statusText}`);
                 } else {
@@ -287,18 +289,18 @@ export class PartAPI {
     }
 
     getEvaluations() {
-        return this.fetch(this.apiEndpoint + "/getEvaluations").then(res => res.data);
+        return this.fetch(this.apiEndpoint + "/getEvaluations").then((res) => res.data);
     }
 
     getEvaluationMetadata() {
-        return this.fetch(this.apiEndpoint + "/evaluationMetadata").then(res => res.data);
+        return this.fetch(this.apiEndpoint + "/evaluationMetadata").then((res) => res.data);
     }
 
     createEvaluation(evaluationData) {
         const requestOptions = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({evaluationData: evaluationData}),
+            body: JSON.stringify({ evaluationData: evaluationData }),
         };
 
         return this.fetch(this.apiEndpoint + "/createEvaluation", requestOptions);
@@ -308,23 +310,23 @@ export class PartAPI {
         const requestOptions = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({evaluationData: evaluationData}),
+            body: JSON.stringify({ evaluationData: evaluationData }),
         };
 
         return this.fetch(this.apiEndpoint + "/editEvaluation", requestOptions);
     }
 
     getEvaluationById(id) {
-        return this.fetch(this.apiEndpoint + "/evaluationById?id=" + id.toString()).then(res => res.data);
+        return this.fetch(this.apiEndpoint + "/evaluationById?id=" + id.toString()).then((res) => res.data);
     }
 
     deleteEvaluation(id) {
         const requestOptions = {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({id: id}),
+            body: JSON.stringify({ id: id }),
         };
-        return this.fetch(this.apiEndpoint + "/deleteEvaluation", requestOptions).then(res => res.data);
+        return this.fetch(this.apiEndpoint + "/deleteEvaluation", requestOptions).then((res) => res.data);
     }
 
     deleteSurvey(id) {
@@ -336,6 +338,43 @@ export class PartAPI {
     }
 
     getResponseById(id) {
-        return this.fetch(this.apiEndpoint + `/getResponse?id=${id}`).then(res => res.data);
+        return this.fetch(this.apiEndpoint + `/getResponse?id=${id}`).then((res) => res.data);
+    }
+
+    getUserById(id) {
+        return this.fetch(this.apiEndpoint + `/getUser?id=${id}`).then((res) => res.data);
+    }
+
+    getCurrentUser() {
+        return this.fetch(this.apiEndpoint + `/getCurrentUser`).then((res) => res.data);
+    }
+
+    getAllUsers() {
+        if (this.authenticationToken.context.roles.indexOf("admin") === -1) {
+            return new Promise((resolve) => resolve([]));
+        }
+        return this.fetch(this.apiEndpoint + `/getUsers`).then((res) => res.data);
+    }
+
+    createUser(username, password, emailAddress) {
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, password: password, emailAddress: emailAddress }),
+        };
+        return this.fetch(this.apiEndpoint + "/createUser", requestOptions);
+    }
+
+    deleteUser(id) {
+        return this.fetch(this.apiEndpoint + `/deleteUser?id=${id}`);
+    }
+
+    changePassword(oldPassword, newPassword, confirmPassword) {
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: this.authenticationToken.context.uid, oldPassword: oldPassword, newPassword: newPassword, confirmPassword: confirmPassword }),
+        };
+        return this.fetch(this.apiEndpoint + "/changePassword", requestOptions);
     }
 }
