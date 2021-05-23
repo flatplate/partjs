@@ -10,8 +10,8 @@ export class PartAPI {
         this.lastAuthenticationCheck = new Date(0);
     }
 
-    fetch(...args) {
-        return fetch(...args).then(res => {
+    fetch(url, options) {
+        return fetch(url, {...options, credentials: "include"}).then(res => {
             if (!res.ok) {
                 if (res.status === 401) {
                     this.checkAuthentication();
