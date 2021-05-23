@@ -1,9 +1,9 @@
-import { throws } from "assert";
-import jwt from "jwt-decode";
+import {throws} from 'assert';
+import jwt from 'jwt-decode';
 
 export class PartAPI {
     constructor(apiEndpoint) {
-        this.apiEndpoint = apiEndpoint ? apiEndpoint : "";
+        this.apiEndpoint = apiEndpoint ? apiEndpoint : '';
         this.authenticated = null;
         this.authenticationToken = null;
         this.listeners = {};
@@ -11,7 +11,7 @@ export class PartAPI {
     }
 
     fetch(...args) {
-        return fetch(...args).then((res) => {
+        return fetch(...args).then(res => {
             if (!res.ok) {
                 if (res.status === 401) {
                     this.checkAuthentication();
@@ -19,7 +19,7 @@ export class PartAPI {
                 if (res.message) {
                     throw Error(res.message);
                 }
-                return res.json().then((json) => {
+                return res.json().then(json => {
                     throw Error(json.message);
                 });
             } else {
@@ -29,73 +29,73 @@ export class PartAPI {
     }
 
     getQuestions() {
-        return this.fetch(this.apiEndpoint + "/getQuestions").then((response) => response.data);
+        return this.fetch(this.apiEndpoint + '/getQuestions').then(response => response.data);
     }
 
     editQuestion(questionData) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(questionData),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(questionData)
         };
-        return this.fetch(this.apiEndpoint + "/editQuestion", requestOptions);
+        return this.fetch(this.apiEndpoint + '/editQuestion', requestOptions);
     }
 
     createQuestion(questionData) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(questionData),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(questionData)
         };
-        return this.fetch(this.apiEndpoint + "/createQuestion", requestOptions);
+        return this.fetch(this.apiEndpoint + '/createQuestion', requestOptions);
     }
 
     deleteQuestion(questionId) {
         const questionData = {
-            id: questionId,
+            id: questionId
         };
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(questionData),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(questionData)
         };
-        return this.fetch(this.apiEndpoint + "/deleteQuestion", requestOptions);
+        return this.fetch(this.apiEndpoint + '/deleteQuestion', requestOptions);
     }
 
     getQuestionTypes() {
-        return this.fetch(this.apiEndpoint + "/questionTypes").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/questionTypes').then(res => res.data);
     }
 
     getSurveys() {
-        return this.fetch(this.apiEndpoint + "/getSurveys").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/getSurveys').then(res => res.data);
     }
 
     createSurvey(surveyData) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(surveyData),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(surveyData)
         };
 
-        return this.fetch(this.apiEndpoint + "/createSurvey", requestOptions);
+        return this.fetch(this.apiEndpoint + '/createSurvey', requestOptions);
     }
 
     authenticate(username, password) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username, password: password }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: username, password: password})
         };
-        return this.fetch(this.apiEndpoint + "/authenticate", requestOptions)
-            .then((res) => {
+        return this.fetch(this.apiEndpoint + '/authenticate', requestOptions)
+            .then(res => {
                 this.authenticated = true;
                 this.authenticationToken = jwt(res.data);
-                this.notify("authenticated", this.authenticated);
+                this.notify('authenticated', this.authenticated);
             })
-            .catch((error) => {
+            .catch(error => {
                 this.authenticated = false;
                 this.authenticationToken = null;
-                this.notify("authenticated", this.authenticated);
+                this.notify('authenticated', this.authenticated);
                 throw error;
             });
     }
@@ -109,17 +109,17 @@ export class PartAPI {
 
         this.lastAuthenticationCheck = currentDate;
 
-        return this.fetch(this.apiEndpoint + "/authenticated")
-            .then((res) => {
+        return this.fetch(this.apiEndpoint + '/authenticated')
+            .then(res => {
                 this.authenticated = true;
                 this.authenticationToken = res.data;
-                this.notify("authenticated", this.authenticated);
+                this.notify('authenticated', this.authenticated);
             })
-            .catch((error) => {
-                console.log("error in check authenticated", error);
+            .catch(error => {
+                console.log('error in check authenticated', error);
                 this.authenticated = false;
                 this.authenticationToken = null;
-                this.notify("authenticated", this.authenticated);
+                this.notify('authenticated', this.authenticated);
             });
     }
 
@@ -132,34 +132,34 @@ export class PartAPI {
 
     removeListener(event, listener) {
         if (this.listeners[event]) {
-            this.listeners[event] = this.listeners[event].filter((oldListener) => oldListener !== listener);
+            this.listeners[event] = this.listeners[event].filter(oldListener => oldListener !== listener);
         }
     }
 
     notify(event, value) {
         if (this.listeners[event]) {
-            this.listeners[event].forEach((listener) => listener(value));
+            this.listeners[event].forEach(listener => listener(value));
         }
     }
 
     getQuestionById(id) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: id }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
         };
-        return this.fetch(this.apiEndpoint + "/getQuestionById", requestOptions);
+        return this.fetch(this.apiEndpoint + '/getQuestionById', requestOptions);
     }
 
     getSurveyById(id) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: id }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
         };
-        return fetch(this.apiEndpoint + "/getSurveyById", requestOptions)
-            .then((res) => res.json())
-            .then((res) => {
+        return fetch(this.apiEndpoint + '/getSurveyById', requestOptions)
+            .then(res => res.json())
+            .then(res => {
                 console.log(res);
                 return res.data;
             });
@@ -168,42 +168,42 @@ export class PartAPI {
     editSurvey(surveyData) {
         console.log(surveyData);
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(surveyData),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(surveyData)
         };
-        return this.fetch(this.apiEndpoint + "/editSurvey", requestOptions);
+        return this.fetch(this.apiEndpoint + '/editSurvey', requestOptions);
     }
 
     setActiveSurvey(surveyId) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ surveyId: surveyId }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({surveyId: surveyId})
         };
-        return this.fetch(this.apiEndpoint + "/setActiveSurvey", requestOptions);
+        return this.fetch(this.apiEndpoint + '/setActiveSurvey', requestOptions);
     }
 
     setInactiveSurvey(surveyId) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ surveyId: surveyId }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({surveyId: surveyId})
         };
-        return this.fetch(this.apiEndpoint + "/setInactiveSurvey", requestOptions);
+        return this.fetch(this.apiEndpoint + '/setInactiveSurvey', requestOptions);
     }
 
     postResponse(surveyId, response) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ surveyId: surveyId, response: response }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({surveyId: surveyId, response: response})
         };
-        return this.fetch(this.apiEndpoint + "/postResponse", requestOptions);
+        return this.fetch(this.apiEndpoint + '/postResponse', requestOptions);
     }
 
     getActiveSurvey() {
-        return this.fetch(this.apiEndpoint + "/getActiveSurvey");
+        return this.fetch(this.apiEndpoint + '/getActiveSurvey');
     }
 
     getDataTypes(file, onProgress) {
@@ -212,10 +212,10 @@ export class PartAPI {
         const formData = new FormData();
         const maxBlobSize = 1024 * 10; // 10kB;
         const blob = file.slice(0, maxBlobSize);
-        formData.append("file", blob);
+        formData.append('file', blob);
 
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", this.apiEndpoint + "/dataType", true);
+        xhr.open('POST', this.apiEndpoint + '/dataType', true);
 
         if (onProgress) xhr.upload.onprogress = onProgress;
 
@@ -239,10 +239,10 @@ export class PartAPI {
         // Using XHR here because we need to check the progress of the file upload
         // which the fetch API doesn't support
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", this.apiEndpoint + "/dataFileUpload", true);
+        xhr.open('POST', this.apiEndpoint + '/dataFileUpload', true);
 
         if (onProgress) xhr.upload.onprogress = onProgress;
 
@@ -263,70 +263,70 @@ export class PartAPI {
     }
 
     getDataEvaluationStrategies() {
-        return this.fetch(this.apiEndpoint + "/dataEvaluationStrategies").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/dataEvaluationStrategies').then(res => res.data);
     }
 
     getMetrics() {
-        return this.fetch(this.apiEndpoint + "/metrics").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/metrics').then(res => res.data);
     }
 
     createMetric(metricName) {
         const requestOptions = {
-            method: "PUT",
+            method: 'PUT'
         };
         return this.fetch(this.apiEndpoint + `/metrics?metricName=${metricName}`, requestOptions);
     }
 
     deleteMetric(metricName) {
         const requestOptions = {
-            method: "DELETE",
+            method: 'DELETE'
         };
         return this.fetch(this.apiEndpoint + `/metrics?metricName=${metricName}`, requestOptions);
     }
 
     getResponses() {
-        return this.fetch(this.apiEndpoint + "/getResponses").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/getResponses').then(res => res.data);
     }
 
     getEvaluations() {
-        return this.fetch(this.apiEndpoint + "/getEvaluations").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/getEvaluations').then(res => res.data);
     }
 
     getEvaluationMetadata() {
-        return this.fetch(this.apiEndpoint + "/evaluationMetadata").then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/evaluationMetadata').then(res => res.data);
     }
 
     createEvaluation(evaluationData) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ evaluationData: evaluationData }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({evaluationData: evaluationData})
         };
 
-        return this.fetch(this.apiEndpoint + "/createEvaluation", requestOptions);
+        return this.fetch(this.apiEndpoint + '/createEvaluation', requestOptions);
     }
 
     editEvaluation(evaluationData) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ evaluationData: evaluationData }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({evaluationData: evaluationData})
         };
 
-        return this.fetch(this.apiEndpoint + "/editEvaluation", requestOptions);
+        return this.fetch(this.apiEndpoint + '/editEvaluation', requestOptions);
     }
 
     getEvaluationById(id) {
-        return this.fetch(this.apiEndpoint + "/evaluationById?id=" + id.toString()).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/evaluationById?id=' + id.toString()).then(res => res.data);
     }
 
     deleteEvaluation(id) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: id }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
         };
-        return this.fetch(this.apiEndpoint + "/deleteEvaluation", requestOptions).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + '/deleteEvaluation', requestOptions).then(res => res.data);
     }
 
     deleteSurvey(id) {
@@ -334,35 +334,35 @@ export class PartAPI {
     }
 
     logout() {
-        return this.fetch(this.apiEndpoint + "/logout");
+        return this.fetch(this.apiEndpoint + '/logout');
     }
 
     getResponseById(id) {
-        return this.fetch(this.apiEndpoint + `/getResponse?id=${id}`).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + `/getResponse?id=${id}`).then(res => res.data);
     }
 
     getUserById(id) {
-        return this.fetch(this.apiEndpoint + `/getUser?id=${id}`).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + `/getUser?id=${id}`).then(res => res.data);
     }
 
     getCurrentUser() {
-        return this.fetch(this.apiEndpoint + `/getCurrentUser`).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + `/getCurrentUser`).then(res => res.data);
     }
 
     getAllUsers() {
-        if (this.authenticationToken.context.roles.indexOf("admin") === -1) {
-            return new Promise((resolve) => resolve([]));
+        if (this.authenticationToken.context.roles.indexOf('admin') === -1) {
+            return new Promise(resolve => resolve([]));
         }
-        return this.fetch(this.apiEndpoint + `/getUsers`).then((res) => res.data);
+        return this.fetch(this.apiEndpoint + `/getUsers`).then(res => res.data);
     }
 
     createUser(username, password, emailAddress) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username, password: password, emailAddress: emailAddress }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: username, password: password, emailAddress: emailAddress})
         };
-        return this.fetch(this.apiEndpoint + "/createUser", requestOptions);
+        return this.fetch(this.apiEndpoint + '/createUser', requestOptions);
     }
 
     deleteUser(id) {
@@ -371,10 +371,19 @@ export class PartAPI {
 
     changePassword(oldPassword, newPassword, confirmPassword) {
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: this.authenticationToken.context.uid, oldPassword: oldPassword, newPassword: newPassword, confirmPassword: confirmPassword }),
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                id: this.authenticationToken.context.uid,
+                oldPassword: oldPassword,
+                newPassword: newPassword,
+                confirmPassword: confirmPassword
+            })
         };
-        return this.fetch(this.apiEndpoint + "/changePassword", requestOptions);
+        return this.fetch(this.apiEndpoint + '/changePassword', requestOptions);
+    }
+
+    getExportCsvLink() {
+        return this.apiEndpoint + '/getResponsesCsv';
     }
 }
